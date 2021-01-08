@@ -1,4 +1,4 @@
-namespace App
+namespace MqttGui.App
 
 /// You can use modules in Avalonia.FuncUI in the same way you would do
 /// in [Elmish ](https://elmish.github.io/elmish/)

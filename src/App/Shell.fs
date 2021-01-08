@@ -1,4 +1,4 @@
-namespace App
+namespace MqttGui.App
 
 /// This is the main module of your application
 /// here you handle all of your child pages as well as their

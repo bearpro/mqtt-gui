@@ -1,4 +1,4 @@
-namespace App
+namespace MqttGui.App
 
 module Counter =
     open Avalonia.Controls

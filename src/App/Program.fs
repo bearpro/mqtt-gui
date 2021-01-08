@@ -1,4 +1,4 @@
-namespace App
+namespace MqttGui.App
 
 open Avalonia
 open Avalonia.Controls.ApplicationLifetimes
