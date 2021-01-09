@@ -17,39 +17,37 @@ module Shell =
     open Avalonia.FuncUI.Elmish
 
     type State =
-        /// store the child state in your main state
-        { aboutState: About.State; counterState: Counter.State;}
+      { AboutState: About.State 
+        CounterState: Counter.State
+        WatchState: Watch.State }
 
     type Msg =
         | AboutMsg of About.Msg
         | CounterMsg of Counter.Msg
+        | WatchMsg of Watch.Msg
 
-    let init =
+    let init=
         let aboutState, aboutCmd = About.init
         let counterState = Counter.init
-        { aboutState = aboutState; counterState = counterState },
-        /// If your children controls don't emit any commands
-        /// in the init function, you can just return Cmd.none
-        /// otherwise, you can use a batch operation on all of them
-        /// you can add more init commands as you need
-        Cmd.batch [ aboutCmd ]
+        let watchState, watchCmd = Watch.init
+        { AboutState = aboutState; CounterState = counterState; WatchState = watchState },
+        Cmd.batch [ aboutCmd; Cmd.map WatchMsg watchCmd ]
 
     let update (msg: Msg) (state: State): State * Cmd<_> =
         match msg with
         | AboutMsg bpmsg ->
             let aboutState, cmd =
-                About.update bpmsg state.aboutState
-            { state with aboutState = aboutState },
-            /// map the message to the kind of message 
-            /// your child control needs to handle
+                About.update bpmsg state.AboutState
+            { state with AboutState = aboutState },
             Cmd.map AboutMsg cmd
         | CounterMsg countermsg ->
-            let counterMsg =
-                Counter.update countermsg state.counterState
-            { state with counterState = counterMsg },
-            /// map the message to the kind of message 
-            /// your child control needs to handle
+            let counterState =
+                Counter.update countermsg state.CounterState
+            { state with CounterState = counterState },
             Cmd.none
+        | WatchMsg watchMsg -> 
+            let watchState, watchMsg' = Watch.update watchMsg state.WatchState
+            { state with WatchState = watchState}, Cmd.map WatchMsg watchMsg'
 
     let view (state: State) (dispatch) =
         DockPanel.create
@@ -59,15 +57,14 @@ module Shell =
                       TabControl.viewItems
                           [ TabItem.create
                                 [ TabItem.header "Counter Sample"
-                                  TabItem.content (Counter.view state.counterState (CounterMsg >> dispatch)) ]
+                                  TabItem.content (Counter.view state.CounterState (CounterMsg >> dispatch)) ]
                             TabItem.create
                                 [ TabItem.header "About"
-                                  TabItem.content (About.view state.aboutState (AboutMsg >> dispatch)) ] ] ] ] ]
+                                  TabItem.content (About.view state.AboutState (AboutMsg >> dispatch)) ]
+                            TabItem.create
+                                [ TabItem.header "Watch"
+                                  TabItem.content (Watch.view state.WatchState (WatchMsg >> dispatch)) ] ] ] ] ]
 
-    /// This is the main window of your application
-    /// you can do all sort of useful things here like setting heights and widths
-    /// as well as attaching your dev tools that can be super useful when developing with
-    /// Avalonia
     type MainWindow() as this =
         inherit HostWindow()
         do
@@ -79,7 +76,8 @@ module Shell =
 
             //this.VisualRoot.VisualRoot.Renderer.DrawFps <- true
             //this.VisualRoot.VisualRoot.Renderer.DrawDirtyRects <- true
-
+            
+            this.AttachDevTools()
             Elmish.Program.mkProgram (fun () -> init) update view
             |> Program.withHost this
             |> Program.run
