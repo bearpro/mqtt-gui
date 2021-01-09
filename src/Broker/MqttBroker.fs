@@ -1,13 +1,11 @@
-namespace DistanceMonitoring.Web.Services
+namespace MqttGui.Broker
 
 open System
-open System.Text
 
 open MQTTnet
 open MQTTnet.Server
 
 open MqttGui.Broker.Types
-open MqttGui.Broker
 
 type MqttBroker() =
     let server = MqttFactory().CreateMqttServer()
